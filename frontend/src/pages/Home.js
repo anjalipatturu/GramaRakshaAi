@@ -47,9 +47,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      <section className="relative overflow-hidden bg-gradient-to-br from-forest-green via-muted-terracotta to-sand-beige">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-electric-teal rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-muted-terracotta rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#0B3C5D] via-[#00A896] to-[#F4F9FB]">
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-[#00A896] rounded-full mix-blend-multiply filter blur-xl opacity-35 animate-blob"></div>
+        <div className="absolute top-0 -right-4 w-72 h-72 bg-[#FF7A00] rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
         
         <div className="relative container mx-auto px-6 py-24 md:py-32">
           <motion.div
@@ -61,13 +61,13 @@ const Home = () => {
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-shadow">
               GramaRaksha AI
             </h1>
-            <p className="text-xl md:text-2xl mb-4 text-sand-beige">
+            <p className="text-xl md:text-2xl mb-4 text-[#F4F9FB]">
               {currentContent.tagline}
             </p>
             <h2 className="text-3xl md:text-5xl font-bold mb-8 max-w-4xl mx-auto">
               {currentContent.hero}
             </h2>
-            <p className="text-lg md:text-xl mb-12 text-sand-beige/90">
+            <p className="text-lg md:text-xl mb-12 text-[#F4F9FB]/90">
               {currentContent.description}
             </p>
             
@@ -76,7 +76,7 @@ const Home = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-electric-teal text-white rounded-xl font-semibold text-lg shadow-2xl hover:bg-opacity-90 transition-all"
+                  className="px-8 py-4 bg-[#00A896] text-white rounded-xl font-semibold text-lg shadow-2xl hover:bg-[#0B3C5D] transition-all"
                 >
                   {currentContent.startScreening}
                 </motion.button>
@@ -86,7 +86,7 @@ const Home = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white text-forest-green rounded-xl font-semibold text-lg shadow-2xl hover:bg-sand-beige transition-all"
+                  className="px-8 py-4 bg-[#FF7A00] text-white rounded-xl font-semibold text-lg shadow-2xl hover:bg-[#e66e00] transition-all"
                 >
                   {currentContent.chatWithAI}
                 </motion.button>
@@ -96,9 +96,9 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-sand-beige/30">
+      <section className="py-20 bg-[#F4F9FB]">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center text-forest-green mb-16">
+          <h2 className="text-4xl font-bold text-center text-[#0B3C5D] mb-16">
             {currentContent.features}
           </h2>
           
@@ -114,11 +114,11 @@ const Home = () => {
                   whileHover={{ y: -5 }}
                   className="glass-panel p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all"
                 >
-                  <Icon className="text-4xl text-electric-teal mb-4" />
-                  <h3 className="text-2xl font-bold text-forest-green mb-2">
+                  <Icon className="text-4xl text-[#00A896] mb-4" />
+                  <h3 className="text-2xl font-bold text-[#0B3C5D] mb-2">
                     {module.title}
                   </h3>
-                  <p className="text-soft-charcoal/80">
+                  <p className="text-[#1B1B1B]/80">
                     {module.desc}
                   </p>
                 </motion.div>
@@ -128,7 +128,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-forest-green to-electric-teal text-white">
+      <section className="py-20 bg-gradient-to-r from-[#0B3C5D] to-[#00A896] text-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-8">Why Choose GramaRaksha AI?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -160,42 +160,6 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-sand-beige/30">
-        <div className="container mx-auto px-6">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-center mb-16 text-forest-green"
-          >
-            {currentContent.features}
-          </motion.h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {modules.map((module, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="glass-panel rounded-2xl p-8 hover:shadow-2xl transition-all"
-              >
-                <div className="w-16 h-16 bg-electric-teal/20 rounded-xl flex items-center justify-center mb-6">
-                  <module.icon className="w-8 h-8 text-electric-teal" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-forest-green">
-                  {module.title}
-                </h3>
-                <p className="text-soft-charcoal/80">
-                  {module.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Link to="/emergency">
         <motion.button
           initial={{ scale: 0 }}
@@ -203,7 +167,7 @@ const Home = () => {
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="emergency-btn"
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-[#D90429] text-white rounded-full shadow-2xl hover:bg-[#b50322] transition-all duration-300 animate-pulse-slow flex items-center justify-center"
         >
           <span className="text-2xl">🚨</span>
         </motion.button>

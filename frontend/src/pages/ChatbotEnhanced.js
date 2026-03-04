@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaRobot, FaPaperPlane, FaMicrophone, FaStopCircle, FaSmile, FaExclamationTriangle, FaHospital, FaQuestionCircle, FaHeartbeat } from 'react-icons/fa';
+import { FaRobot, FaPaperPlane, FaMicrophone, FaStopCircle, FaSmile, FaExclamationTriangle, FaHospital, FaQuestionCircle, FaHeartbeat, FaVolumeUp, FaVolumeMute, FaGlobe, FaImage } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import toast from 'react-hot-toast';
 
 const ChatbotEnhanced = () => {
-  const { language, setLanguage, sendChatMessage } = useApp();
+  const { language, setLanguage, sendChatMessage, uploadImage, user } = useApp();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [sessionId, setSessionId] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef(null);
+  const synthRef = useRef(window.speechSynthesis);
+  const imageInputRef = useRef(null);
 
   const quickReplies = {
     en: ['I have fever', 'Chest pain', 'Difficulty breathing', 'Headache', 'Abdominal pain'],
@@ -56,6 +61,52 @@ const ChatbotEnhanced = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Text-to-Speech function
+  const speakText = (text, isEmergency = false) => {
+    if (!voiceEnabled || !text) return;
+    
+    // Cancel any ongoing speech
+    synthRef.current.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Set language
+    utterance.lang = language === 'hi' ? 'hi-IN' : language === 'te' ? 'te-IN' : 'en-IN';
+    
+    // Emergency voice settings
+    if (isEmergency) {
+      utterance.rate = 1.1; // Slightly faster
+      utterance.pitch = 1.2; // Higher pitch for urgency
+      utterance.volume = 1.0; // Max volume
+    } else {
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+    }
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    
+    synthRef.current.speak(utterance);
+  };
+
+  // Stop speaking function
+  const stopSpeaking = () => {
+    synthRef.current.cancel();
+    setIsSpeaking(false);
+  };
+
+  // Toggle voice assistant
+  const toggleVoice = () => {
+    const newState = !voiceEnabled;
+    setVoiceEnabled(newState);
+    if (!newState) {
+      stopSpeaking();
+    }
+    toast.success(newState ? '🔊 Voice enabled' : '🔇 Voice disabled');
+  };
+
   const handleSendMessage = async (messageText = inputMessage) => {
     if (!messageText.trim()) return;
 
@@ -86,6 +137,12 @@ const ChatbotEnhanced = () => {
         timestamp: new Date()
       }]);
 
+      // Speak the response if voice is enabled
+      if (voiceEnabled && response.recommendations && response.recommendations.length > 0) {
+        const spokenText = `${response.risk_level} risk detected. ${response.recommendations[0]}`;
+        speakText(spokenText, response.emergency);
+      }
+
       if (response.emergency) {
         toast.error('🚨 EMERGENCY DETECTED! Call 108 immediately!', {
           duration: 10000,
@@ -100,6 +157,45 @@ const ChatbotEnhanced = () => {
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!user?._id) {
+      toast.error('Please login to upload an image');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const uploaded = await uploadImage(file, 'other');
+
+      setMessages((prev) => [...prev, {
+        role: 'user',
+        content: `📷 Uploaded image: ${file.name}`,
+        timestamp: new Date()
+      }]);
+
+      const analysisText = uploaded?.image?.analysis?.possibleIssue
+        ? `Image uploaded successfully. Possible issue: ${uploaded.image.analysis.possibleIssue}`
+        : 'Image uploaded successfully.';
+
+      setMessages((prev) => [...prev, {
+        role: 'bot',
+        content: analysisText,
+        timestamp: new Date()
+      }]);
+
+      toast.success('✅ Image uploaded successfully');
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
     }
   };
 
@@ -118,16 +214,32 @@ const ChatbotEnhanced = () => {
 
     recognition.onstart = () => {
       setIsListening(true);
-      toast.success('Listening...');
+      setInputMessage(''); // Clear input when starting
+      toast.success('🎤 Listening... Speak now!');
     };
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
+      let finalTranscript = '';
+      
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          setInputMessage(transcript);
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
         }
+      }
+      
+      // Show text in real-time as user speaks (interim results)
+      if (interimTranscript) {
+        setInputMessage(interimTranscript);
+      }
+      
+      // Set final transcribed text
+      if (finalTranscript) {
+        setInputMessage(finalTranscript);
+        toast.success('✅ Voice captured: ' + finalTranscript.substring(0, 30) + '...');
       }
     };
 
@@ -138,21 +250,27 @@ const ChatbotEnhanced = () => {
 
     recognition.onend = () => {
       setIsListening(false);
+      // Auto-send the message after voice input
+      if (inputMessage.trim()) {
+        setTimeout(() => {
+          handleSendMessage();
+        }, 500);
+      }
     };
 
     recognition.start();
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand-beige via-white to-soft-charcoal/5 py-20">
+    <div className="min-h-screen bg-[#F4F9FB] py-20">
       <div className="container mx-auto px-6 max-w-4xl">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
-          className="glass-panel rounded-2xl overflow-hidden shadow-2xl"
+          className="rounded-2xl overflow-hidden shadow-2xl border border-[#00A896]/20 bg-white"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-forest-green via-emerald-600 to-electric-teal p-6 text-white">
+          <div className="bg-gradient-to-r from-[#0B3C5D] via-[#00A896] to-[#0B3C5D] p-6 text-white">
             <div className="flex items-center justify-between">
               <motion.div 
                 className="flex items-center gap-3"
@@ -168,6 +286,22 @@ const ChatbotEnhanced = () => {
               </motion.div>
               
               <div className="flex gap-2">
+                {/* Voice Toggle Button */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={toggleVoice}
+                  className={`px-3 py-2 rounded-lg font-semibold transition-all ${
+                    voiceEnabled 
+                      ? 'bg-white text-[#0B3C5D]' 
+                      : 'bg-gray-300 text-gray-600'
+                  }`}
+                  title={voiceEnabled ? 'Voice Assistant On' : 'Voice Assistant Off'}
+                >
+                  {voiceEnabled ? <FaVolumeUp className="w-5 h-5" /> : <FaVolumeMute className="w-5 h-5" />}
+                </motion.button>
+
+                {/* Language Buttons */}
                 {['en', 'hi', 'te'].map(lang => (
                   <motion.button
                     key={lang}
@@ -176,7 +310,7 @@ const ChatbotEnhanced = () => {
                     onClick={() => setLanguage(lang)}
                     className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                       language === lang
-                        ? 'bg-white text-forest-green'
+                        ? 'bg-white text-[#0B3C5D]'
                         : 'bg-white/20 text-white hover:bg-white/30'
                     }`}
                   >
@@ -188,7 +322,7 @@ const ChatbotEnhanced = () => {
           </div>
 
           {/* Messages Container */}
-          <div className="h-96 overflow-y-auto p-6 space-y-4 bg-white/50">
+          <div className="h-96 overflow-y-auto p-6 space-y-4 bg-[#F4F9FB]">
             <AnimatePresence>
               {messages.map((message, index) => (
                 <motion.div
@@ -199,9 +333,9 @@ const ChatbotEnhanced = () => {
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role === 'user' ? (
-                    <div className="max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl bg-electric-teal text-white rounded-br-none">
+                    <div className="max-w-xs lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl bg-gradient-to-r from-[#0B3C5D] to-[#00A896] text-white rounded-br-none shadow-lg">
                       <p className="whitespace-pre-line break-words">{message.content}</p>
-                      <span className="text-xs mt-2 block text-blue-100">
+                      <span className="text-xs mt-2 block text-white/80">
                         {new Date(message.timestamp).toLocaleTimeString(language === 'en' ? 'en-IN' : 'hi-IN', {
                           hour: '2-digit',
                           minute: '2-digit'
@@ -214,10 +348,10 @@ const ChatbotEnhanced = () => {
                         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                           {/* Risk Level Header */}
                           <div className={`p-4 text-white ${
-                            message.triageData.risk_level === 'CRITICAL' ? 'bg-red-600' :
-                            message.triageData.risk_level === 'HIGH' ? 'bg-orange-600' :
-                            message.triageData.risk_level === 'MODERATE' ? 'bg-yellow-600' :
-                            'bg-green-600'
+                            message.triageData.risk_level === 'CRITICAL' ? 'bg-[#D90429]' :
+                            message.triageData.risk_level === 'HIGH' ? 'bg-[#FF7A00]' :
+                            message.triageData.risk_level === 'MODERATE' ? 'bg-[#00A896]' :
+                            'bg-[#0B3C5D]'
                           }`}>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -236,13 +370,13 @@ const ChatbotEnhanced = () => {
                           {/* Predicted Conditions */}
                           {message.triageData.predicted_conditions?.length > 0 && (
                             <div className="p-4 border-b border-gray-200">
-                              <h4 className="font-semibold text-gray-700 mb-3">🔍 Possible Conditions</h4>
+                              <h4 className="font-semibold text-[#1B1B1B] mb-3">🔍 Possible Conditions</h4>
                               <div className="space-y-2">
                                 {message.triageData.predicted_conditions.map((condition, idx) => (
-                                  <div key={idx} className="flex items-start gap-2 bg-blue-50 p-3 rounded-lg">
-                                    <span className="font-bold text-blue-600">{idx + 1}.</span>
+                                  <div key={idx} className="flex items-start gap-2 bg-[#F4F9FB] p-3 rounded-lg">
+                                    <span className="font-bold text-[#00A896]">{idx + 1}.</span>
                                     <div className="flex-1">
-                                      <p className="font-semibold text-gray-800">{condition.condition}</p>
+                                      <p className="font-semibold text-[#1B1B1B]">{condition.condition}</p>
                                       <p className="text-sm text-gray-600">Likelihood: {condition.probability_estimate}</p>
                                     </div>
                                   </div>
@@ -254,15 +388,15 @@ const ChatbotEnhanced = () => {
                           {/* Recommendations */}
                           {message.triageData.recommendations?.length > 0 && (
                             <div className="p-4 border-b border-gray-200">
-                              <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                                <FaHospital className="text-electric-teal" /> 
+                              <h4 className="font-semibold text-[#1B1B1B] mb-3 flex items-center gap-2">
+                                <FaHospital className="text-[#00A896]" /> 
                                 Recommendations
                               </h4>
                               <ul className="space-y-2">
                                 {message.triageData.recommendations.map((rec, idx) => (
                                   <li key={idx} className="flex items-start gap-2">
-                                    <span className="text-electric-teal mt-1">•</span>
-                                    <span className="text-gray-700">{rec}</span>
+                                    <span className="text-[#00A896] mt-1">•</span>
+                                    <span className="text-[#1B1B1B]">{rec}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -270,19 +404,36 @@ const ChatbotEnhanced = () => {
                           )}
 
                           {/* Disclaimer */}
-                          <div className="p-4 bg-yellow-50">
+                          <div className="p-4 bg-[#FFF4E8] border-b border-[#FF7A00]/20">
                             <p className="text-xs text-gray-600 italic">{message.triageData.disclaimer}</p>
                           </div>
 
-                          <span className="text-xs px-4 pb-2 block text-gray-500">
-                            {new Date(message.timestamp).toLocaleTimeString(language === 'en' ? 'en-IN' : 'hi-IN', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
+                          {/* Voice Control for this message */}
+                          <div className="px-4 pb-2 pt-2 flex items-center justify-between">
+                            <span className="text-xs text-gray-500">
+                              {new Date(message.timestamp).toLocaleTimeString(language === 'en' ? 'en-IN' : 'hi-IN', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                            {voiceEnabled && (
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                  const text = `${message.triageData.risk_level} risk detected. ${message.triageData.recommendations[0]}`;
+                                  speakText(text, message.triageData.emergency);
+                                }}
+                                className="text-[#00A896] hover:text-[#0B3C5D] transition-colors"
+                                title="Read aloud"
+                              >
+                                <FaVolumeUp className="w-4 h-4" />
+                              </motion.button>
+                            )}
+                          </div>
                         </div>
                       ) : (
-                        <div className="px-4 py-3 rounded-2xl rounded-bl-none bg-gray-200 text-gray-800">
+                        <div className="px-4 py-3 rounded-2xl rounded-bl-none bg-white border border-gray-200 text-[#1B1B1B]">
                           <p className="whitespace-pre-line break-words">{message.content}</p>
                           <span className="text-xs mt-2 block text-gray-500">
                             {new Date(message.timestamp).toLocaleTimeString(language === 'en' ? 'en-IN' : 'hi-IN', {
@@ -303,14 +454,14 @@ const ChatbotEnhanced = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex justify-start"
                 >
-                  <div className="px-4 py-3 rounded-2xl rounded-bl-none bg-gray-200">
+                  <div className="px-4 py-3 rounded-2xl rounded-bl-none bg-white border border-gray-200">
                     <motion.div className="flex gap-2">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
                           animate={{ y: [0, -10, 0] }}
                           transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2 }}
-                          className="w-2 h-2 bg-gray-600 rounded-full"
+                          className="w-2 h-2 bg-[#0B3C5D] rounded-full"
                         />
                       ))}
                     </motion.div>
@@ -323,9 +474,9 @@ const ChatbotEnhanced = () => {
 
           {/* Quick Replies */}
           {messages.length <= 1 && (
-            <div className="px-6 py-4 bg-sand-beige/50 border-t border-gray-200">
-              <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <FaSmile className="text-electric-teal" /> {t.quickReplies}
+            <div className="px-6 py-4 bg-white border-t border-[#00A896]/20">
+              <p className="text-sm font-semibold text-[#0B3C5D] mb-3 flex items-center gap-2">
+                <FaSmile className="text-[#FF7A00]" /> {t.quickReplies}
               </p>
               <div className="flex flex-wrap gap-2">
                 {(quickReplies[language] || quickReplies.en).map((reply, idx) => (
@@ -334,7 +485,7 @@ const ChatbotEnhanced = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSendMessage(reply)}
-                    className="px-4 py-2 bg-gradient-to-r from-forest-green to-electric-teal text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all"
+                    className="px-4 py-2 bg-gradient-to-r from-[#0B3C5D] to-[#00A896] text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all"
                   >
                     {reply}
                   </motion.button>
@@ -344,7 +495,50 @@ const ChatbotEnhanced = () => {
           )}
 
           {/* Input Area */}
-          <div className="p-4 bg-gradient-to-r from-sand-beige/30 to-white border-t border-gray-200">
+          <div className="p-4 bg-white border-t border-[#00A896]/20">
+            <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <FaGlobe className="text-[#0B3C5D]" />
+                {['en', 'hi', 'te'].map((lang) => (
+                  <motion.button
+                    key={`chat-lang-${lang}`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setLanguage(lang)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      language === lang
+                        ? 'bg-[#0B3C5D] text-white shadow'
+                        : 'bg-white text-[#0B3C5D] border border-[#0B3C5D]/20'
+                    }`}
+                  >
+                    {lang.toUpperCase()}
+                  </motion.button>
+                ))}
+              </div>
+
+              <div>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={uploadingImage || loading}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-[#FF7A00] to-[#00A896] text-white disabled:opacity-50"
+                  title="Upload image"
+                >
+                  <span className="inline-flex items-center gap-1">
+                    <FaImage /> {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                  </span>
+                </motion.button>
+              </div>
+            </div>
+
             <div className="flex gap-2">
               <input
                 type="text"
@@ -353,7 +547,7 @@ const ChatbotEnhanced = () => {
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Describe your symptoms (e.g., 'I have fever and cough for 3 days')"
                 disabled={loading}
-                className="flex-1 px-4 py-3 rounded-full border-2 border-gray-300 focus:border-electric-teal focus:ring focus:ring-electric-teal/20 transition-all disabled:opacity-50"
+                className="flex-1 px-4 py-3 rounded-full border-2 border-[#00A896]/40 focus:border-[#0B3C5D] focus:ring focus:ring-[#00A896]/30 transition-all disabled:opacity-50 text-[#1B1B1B]"
               />
               
               <motion.button
@@ -363,19 +557,35 @@ const ChatbotEnhanced = () => {
                 disabled={loading}
                 className={`p-3 rounded-full transition-all ${
                   isListening
-                    ? 'bg-red-500 text-white animate-pulse'
-                    : 'bg-orange-500 text-white hover:bg-orange-600'
+                    ? 'bg-[#D90429] text-white animate-pulse'
+                    : 'bg-gradient-to-r from-[#FF7A00] to-[#FF7A00] text-white'
                 } disabled:opacity-50`}
+                title="Voice input"
               >
                 {isListening ? <FaStopCircle /> : <FaMicrophone />}
               </motion.button>
+
+              {/* Stop Speaking Button */}
+              {isSpeaking && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={stopSpeaking}
+                  className="p-3 bg-[#D90429] text-white rounded-full animate-pulse"
+                  title="Stop speaking"
+                >
+                  <FaStopCircle />
+                </motion.button>
+              )}
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleSendMessage()}
                 disabled={!inputMessage.trim() || loading}
-                className="p-3 bg-electric-teal text-white rounded-full hover:bg-opacity-90 transition-all disabled:opacity-50"
+                className="p-3 bg-gradient-to-r from-[#0B3C5D] to-[#00A896] text-white rounded-full transition-all disabled:opacity-50"
               >
                 <FaPaperPlane />
               </motion.button>

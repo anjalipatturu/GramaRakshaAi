@@ -5,17 +5,10 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const path = require('path');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Load environment variables
 dotenv.config();
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-});
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const screeningRoutes = require('./routes/screening.routes');

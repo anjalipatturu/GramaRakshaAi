@@ -2,8 +2,15 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 class ChatbotService {
   constructor() {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    this.offlineMode = process.env.OFFLINE_MODE === 'true';
+    this.apiKey = process.env.GEMINI_API_KEY;
+    this.genAI = null;
+    this.model = null;
+
+    if (!this.offlineMode && this.apiKey) {
+      this.genAI = new GoogleGenerativeAI(this.apiKey);
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    }
     
     this.languages = ['en', 'hi', 'te'];
     this.emergencyKeywords = {
@@ -132,9 +139,13 @@ Risk scoring logic guidelines:
       // Quick emergency check
       const emergencyDetected = this.checkEmergency(message, language);
       
-      // Try AI processing with timeout
+      // Try AI processing with timeout (skip in offline mode)
       let triageData;
       try {
+        if (this.offlineMode || !this.model) {
+          throw new Error('AI disabled in offline mode');
+        }
+
         const prompt = `${this.systemPrompt}
 
 User message: "${message}"

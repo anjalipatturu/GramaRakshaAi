@@ -21,10 +21,10 @@ const Navbar = () => {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-forest-green to-electric-teal rounded-lg flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-gradient-to-r from-[#0B3C5D] to-[#00A896] rounded-lg flex items-center justify-center text-white font-bold">
               GR
             </div>
-            <span className="text-xl font-bold text-forest-green hidden sm:block">
+            <span className="text-xl font-bold text-[#0B3C5D] hidden sm:block">
               GramaRaksha AI
             </span>
           </Link>
@@ -34,7 +34,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-soft-charcoal hover:text-electric-teal transition-colors font-medium"
+                className="text-[#1B1B1B] hover:text-[#00A896] transition-colors font-medium"
               >
                 {link.label[language]}
               </Link>
@@ -42,12 +42,14 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="language-selector">
+            <div className="flex gap-2 p-1 bg-[#F4F9FB] rounded-lg">
               {['en', 'hi', 'te'].map((lang) => (
                 <button
                   key={lang}
                   onClick={() => setLanguage(lang)}
-                  className={`language-btn ${language === lang ? 'active' : ''}`}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                    language === lang ? 'bg-[#0B3C5D] text-white' : 'text-[#1B1B1B] hover:bg-white'
+                  }`}
                 >
                   {lang.toUpperCase()}
                 </button>
@@ -64,7 +66,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/auth/login"
-                className="hidden md:block px-4 py-2 bg-electric-teal text-white rounded-lg hover:bg-forest-green transition-all"
+                className="hidden md:block px-4 py-2 bg-[#00A896] text-white rounded-lg hover:bg-[#0B3C5D] transition-all"
               >
                 Login
               </Link>
@@ -72,7 +74,7 @@ const Navbar = () => {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden text-forest-green"
+              className="md:hidden text-[#0B3C5D]"
             >
               {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
             </button>
@@ -90,7 +92,7 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-soft-charcoal hover:text-electric-teal transition-colors"
+                className="block py-2 text-[#1B1B1B] hover:text-[#00A896] transition-colors"
               >
                 {link.label[language]}
               </Link>
