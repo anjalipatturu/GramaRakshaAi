@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-body text-soft-charcoal;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .neumorph-card {
+    @apply bg-sand-beige/30 shadow-[20px_20px_60px_#d9cdbe,-20px_-20px_60px_#ffffff] rounded-2xl;
+  }
+  
+  .gradient-border {
+    @apply relative bg-gradient-to-r from-forest-green to-electric-teal p-[2px] rounded-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-forest-green text-white rounded-xl hover:bg-electric-teal transition-all duration-300 transform hover:scale-105 shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-muted-terracotta text-white rounded-xl hover:bg-forest-green transition-all duration-300;
+  }
+  
+  .emergency-btn {
+    @apply fixed bottom-6 right-6 z-50 w-16 h-16 bg-red-600 text-white rounded-full shadow-2xl hover:bg-red-700 transition-all duration-300 animate-pulse-slow flex items-center justify-center;
+  }
+  
+  .language-selector {
+    @apply flex gap-2 p-1 bg-sand-beige/50 rounded-lg;
+  }
+  
+  .language-btn {
+    @apply px-3 py-1 rounded-md text-sm font-medium transition-all duration-200;
+  }
+  
+  .language-btn.active {
+    @apply bg-forest-green text-white;
+  }
+  
+  .chat-message {
+    @apply max-w-[80%] p-4 rounded-2xl animate-fadeIn;
+  }
+  
+  .chat-message.user {
+    @apply bg-electric-teal text-white ml-auto;
+  }
+  
+  .chat-message.bot {
+    @apply bg-sand-beige text-soft-charcoal;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+  }
+}
+
+/* Accessibility mode */
+.accessibility-mode {
+  font-size: 120%;
+}
+
+.accessibility-mode button,
+.accessibility-mode a {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+}
+
+/* Dark mode */
+.dark-mode {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.dark-mode .glass-panel {
+  @apply bg-gray-800/80 border-gray-700;
+}

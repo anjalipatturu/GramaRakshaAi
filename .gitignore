@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.npm
+.eslintcache
+
+# Production builds
+*/build/
+*/dist/
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# Optional npm cache directory
+.npm
+
+# OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
