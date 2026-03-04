@@ -26,3 +26,82 @@
 {"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T08:34:45.859Z"}
 {"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T09:06:02.277Z"}
 {"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T09:07:02.630Z"}
+{"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T10:52:11.584Z"}
+{"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T10:54:43.354Z"}
+{"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T10:54:43.754Z"}
+{"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T10:57:02.086Z"}
+{"level":"error","message":"MongoDB connection error: connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:816:11)\n    at NativeConnection.openUri (/home/varshitha/Documents/hackathon 3.0/gramaraksha-ai/backend/node_modules/mongoose/lib/connection.js:791:11)","timestamp":"2026-03-04T10:57:02.165Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T11:20:28.013Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T11:20:28.028Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T11:20:32.291Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T11:23:32.837Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T11:24:54.851Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T11:25:36.186Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T11:25:36.197Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T11:25:51.184Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T11:33:03.046Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T11:34:34.961Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T11:34:34.976Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:10:16.297Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:10:16.395Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:17:55.996Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:17:56.102Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:17:56.115Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:18:15.714Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:18:15.843Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:18:15.996Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:18:37.243Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:18:37.350Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:18:37.598Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:20:34.215Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:20:34.328Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:20:34.542Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:21:17.930Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:21:18.076Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:21:18.238Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T12:22:00.722Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:22:16.512Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:22:16.613Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:24:33.128Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:25:34.755Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:39:27.809Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:40:03.111Z"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","timestamp":"2026-03-04T12:40:08.141Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:40:28.204Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:40:28.306Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T12:58:08.019Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T12:58:08.033Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:08:59.241Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:08:59.256Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:09:03.431Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:09:03.446Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:10:52.326Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:10:52.339Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:12:02.537Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:12:49.539Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:12:49.552Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:14:39.052Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:14:39.056Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:14:39.066Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:15:10.906Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:15:10.916Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:15:10.917Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:15:52.138Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:15:52.149Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:19:50.290Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:19:50.308Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:22:57.368Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:22:57.383Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:24:41.514Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:24:41.530Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:27:35.276Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:30:45.090Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:35:28.983Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:36:16.162Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:36:16.172Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:40:24.556Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:40:24.568Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:40:46.924Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:40:46.937Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2026-03-04T13:42:44.531Z"}
+{"level":"info","message":"Server running on port 5000","timestamp":"2026-03-04T13:42:44.540Z"}

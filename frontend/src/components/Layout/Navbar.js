@@ -14,7 +14,6 @@ const Navbar = () => {
     { path: '/chatbot', label: { en: 'AI Chatbot', hi: 'AI चैटबॉट', te: 'AI చాట్‌బాట్' } },
     { path: '/image-upload', label: { en: 'Image Analysis', hi: 'छवि विश्लेषण', te: 'చిత్ర విశ్లేషణ' } },
     { path: '/schemes', label: { en: 'Health Schemes', hi: 'स्वास्थ्य योजनाएं', te: 'ఆరోగ్య పథకాలు' } },
-    { path: '/dashboard', label: { en: 'Dashboard', hi: 'डैशबोर्ड', te: 'డాష్‌బోర్డ్' } },
   ];
 
   return (

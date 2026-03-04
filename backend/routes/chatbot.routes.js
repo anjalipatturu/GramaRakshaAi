@@ -23,7 +23,7 @@ router.post('/message', async (req, res) => {
       }
     }
 
-    const response = await chatbotService.processMessage(
+    const triageResponse = await chatbotService.processMessage(
       message, 
       language, 
       userId, 
@@ -45,26 +45,27 @@ router.post('/message', async (req, res) => {
     chatLog.messages.push({
       role: 'user',
       content: message,
-      language: response.language,
+      language: triageResponse.language,
       timestamp: new Date()
     });
 
+    // Store the full triage response
     chatLog.messages.push({
       role: 'bot',
-      content: response.response,
-      language: response.language,
+      content: JSON.stringify(triageResponse),
+      language: triageResponse.language,
       timestamp: new Date()
     });
 
-    if (response.emergency) {
+    if (triageResponse.emergency) {
       chatLog.emergencyDetected = true;
-      chatLog.emergencyDetails = response.response;
+      chatLog.emergencyDetails = `Risk Level: ${triageResponse.risk_level}, Score: ${triageResponse.risk_score}`;
     }
 
     await chatLog.save();
 
     res.json({
-      ...response,
+      ...triageResponse,
       sessionId: chatSessionId,
       messageId: chatLog.messages[chatLog.messages.length - 1]._id
     });

@@ -8,7 +8,7 @@ import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 
 import Home from './pages/Home';
-import SymptomCheckerEnhanced from './pages/SymptomCheckerEnhanced';
+import SymptomCheckerAI from './pages/SymptomCheckerAI';
 import ChatbotEnhanced from './pages/ChatbotEnhanced';
 import DashboardEnhanced from './pages/DashboardEnhanced';
 import HealthSchemes from './pages/HealthSchemes';
@@ -27,7 +27,7 @@ function App() {
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/symptom-checker" element={<SymptomCheckerEnhanced />} />
+              <Route path="/symptom-checker" element={<SymptomCheckerAI />} />
               <Route path="/chatbot" element={<ChatbotEnhanced />} />
               <Route path="/dashboard" element={<DashboardEnhanced />} />
               <Route path="/schemes" element={<HealthSchemes />} />

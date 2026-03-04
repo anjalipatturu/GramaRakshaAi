@@ -137,6 +137,8 @@ export const AppProvider = ({ children }) => {
 
   const sendChatMessage = async (message, sessionId = null) => {
     try {
+      console.log('Sending message:', { message, language, sessionId });
+      
       const response = await api.post('/chatbot/message', {
         message,
         language,
@@ -144,9 +146,12 @@ export const AppProvider = ({ children }) => {
         sessionId
       });
       
+      console.log('Response received:', response.data);
       return response.data;
     } catch (error) {
-      toast.error('Error sending message');
+      console.error('Send message error:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Error sending message');
       throw error;
     }
   };

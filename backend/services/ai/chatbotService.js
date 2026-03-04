@@ -1,11 +1,81 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 class ChatbotService {
   constructor() {
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    
     this.languages = ['en', 'hi', 'te'];
     this.emergencyKeywords = {
-      en: ['chest pain', 'breathless', 'heart attack', 'unconscious', 'severe bleeding', 'stroke'],
-      hi: ['सीने में दर्द', 'सांस फूलना', 'हार्ट अटैक', 'बेहोश', 'गंभीर रक्तस्राव', 'लकवा'],
-      te: ['గుండె నొప్పి', 'ఊపిరి ఆడకపోవడం', 'గుండెపోటు', 'స్పృహ తప్పడం', 'తీవ్ర రక్తస్రావం', 'పక్షవాతం']
+      en: ['chest pain', 'breathless', 'heart attack', 'unconscious', 'severe bleeding', 'stroke', 'seizure', 'difficulty breathing'],
+      hi: ['सीने में दर्द', 'सांस फूलना', 'हार्ट अटैक', 'बेहोश', 'गंभीर रक्तस्राव', 'लकवा', 'दौरा'],
+      te: ['గుండె నొప్పి', 'ఊపిరి ఆడకపోవడం', 'గుండెపోటు', 'స్పృహ తప్పడం', 'తీవ్ర రక్తస్రావం', 'పక్షవాతం', 'మూర్ఛ']
     };
+    
+    this.systemPrompt = `You are an AI-powered Smart Medical Triage Assistant integrated into a healthcare website chatbot.
+
+Your responsibilities:
+
+1. Analyze user symptoms provided via text or voice input.
+2. Ask intelligent follow-up questions if symptom information is incomplete.
+3. Predict multiple possible medical conditions (top 3 most likely).
+4. Calculate a Risk Score between 0–100 based on severity and symptom combination.
+5. Classify Risk Level into one of:
+   - LOW (0–25)
+   - MODERATE (26–50)
+   - HIGH (51–75)
+   - CRITICAL (76–100)
+6. Detect emergency symptoms immediately:
+   - Chest pain
+   - Difficulty breathing
+   - Severe bleeding
+   - Unconsciousness
+   - Stroke symptoms
+   - Seizures
+If emergency symptoms are detected:
+   - Set risk score above 85
+   - Mark emergency as true
+   - Clearly instruct the user to seek immediate medical care.
+
+7. Provide intelligent recommendations including:
+   - Immediate next steps
+   - Home care guidance (if safe)
+   - When to see a doctor
+   - Preventive advice
+
+8. Never provide prescription medication names or dosages.
+9. Never claim to give a confirmed diagnosis.
+10. Always include this disclaimer at the end:
+   "This tool provides preliminary health information and is not a substitute for professional medical advice."
+
+Respond STRICTLY in the following JSON format:
+
+{
+  "symptom_summary": "",
+  "predicted_conditions": [
+    {
+      "condition": "",
+      "probability_estimate": ""
+    }
+  ],
+  "risk_score": 0,
+  "risk_level": "",
+  "emergency": false,
+  "recommendations": [
+    ""
+  ],
+  "follow_up_questions": [
+    ""
+  ],
+  "disclaimer": "This tool provides preliminary health information and is not a substitute for professional medical advice."
+}
+
+Risk scoring logic guidelines:
+- Mild symptoms (no fever, no pain) → score below 25
+- Fever + mild pain → 30–45
+- Persistent symptoms >3 days → add +15
+- Severe pain, breathing issues, chest discomfort → 60+
+- Life-threatening symptoms → 85–100`;
     
     this.responses = {
       en: this.getEnglishResponses(),
@@ -59,39 +129,320 @@ class ChatbotService {
         language = this.detectLanguage(message);
       }
 
+      // Quick emergency check
       const emergencyDetected = this.checkEmergency(message, language);
       
-      if (emergencyDetected) {
-        return {
-          response: this.responses[language].emergency,
-          emergency: true,
-          action: 'call_108',
-          language
-        };
+      // Try AI processing with timeout
+      let triageData;
+      try {
+        const prompt = `${this.systemPrompt}
+
+User message: "${message}"
+Language: ${language}
+
+Analyze the symptoms and provide a medical triage assessment in JSON format.`;
+
+        // Set timeout for AI call
+        const aiPromise = this.model.generateContent(prompt);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('AI timeout')), 10000)
+        );
+        
+        const result = await Promise.race([aiPromise, timeoutPromise]);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Extract JSON from response
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          triageData = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (aiError) {
+        console.error('AI processing error:', aiError.message);
+        // Use fallback logic-based triage
+        triageData = this.generateFallbackTriage(message, emergencyDetected, language);
       }
 
-      const intent = this.detectIntent(message, language);
-      let response = this.generateResponse(intent, language, context);
-
-      if (intent !== 'greeting' && intent !== 'emergency') {
-        response += '\n\n' + this.responses[language].disclaimer;
+      // Override emergency if detected by keywords
+      if (emergencyDetected && triageData.risk_score < 85) {
+        triageData.emergency = true;
+        triageData.risk_score = Math.max(triageData.risk_score, 90);
+        triageData.risk_level = "CRITICAL";
+        triageData.recommendations.unshift("🚨 EMERGENCY: Call 108 immediately or visit the nearest emergency room!");
       }
 
       return {
-        response,
-        intent,
-        language,
-        emergency: false
+        ...triageData,
+        language
       };
 
     } catch (error) {
       console.error('Chatbot error:', error);
-      return {
-        response: 'I apologize, I encountered an error. Please try again or contact your ASHA worker.',
-        error: true,
-        language
-      };
+      return this.generateFallbackTriage(message, false, language);
     }
+  }
+
+  generateFallbackTriage(message, emergencyDetected, language) {
+    const lowerMessage = message.toLowerCase();
+    
+    // Initialize with baseline score
+    let riskScore = 0;
+    let conditions = [];
+    let recommendations = [];
+    let followUpQuestions = [];
+    let severity = {};
+
+    // SYMPTOM DETECTION AND SCORING
+    
+    // Fever symptoms (contributes 10-20 points)
+    if (lowerMessage.includes('fever') || lowerMessage.includes('temperature')) {
+      riskScore += 10;
+      severity.fever = true;
+      conditions.push({ condition: "Viral Fever", probability_estimate: "Moderate" });
+      conditions.push({ condition: "Flu", probability_estimate: "Moderate" });
+      
+      if (lowerMessage.includes('high fever') || lowerMessage.includes('103') || lowerMessage.includes('104')) {
+        riskScore += 10;
+        severity.highFever = true;
+      }
+      followUpQuestions.push("What is your body temperature?");
+      followUpQuestions.push("How many days have you had fever?");
+    }
+    
+    // Cough symptoms (contributes 5-15 points)
+    if (lowerMessage.includes('cough')) {
+      riskScore += 5;
+      severity.cough = true;
+      if (!conditions.some(c => c.condition.includes('Viral'))) {
+        conditions.push({ condition: "Respiratory Infection", probability_estimate: "Moderate" });
+      }
+      if (lowerMessage.includes('severe cough') || lowerMessage.includes('blood cough')) {
+        riskScore += 10;
+        severity.severeCough = true;
+      }
+      followUpQuestions.push("Is the cough dry or with mucus?");
+      followUpQuestions.push("How long have you been coughing?");
+    }
+    
+    // Headache symptoms (contributes 3-12 points)
+    if (lowerMessage.includes('headache') || lowerMessage.includes('head pain')) {
+      riskScore += 3;
+      severity.headache = true;
+      if (lowerMessage.includes('severe headache') || lowerMessage.includes('worst headache')) {
+        riskScore += 9;
+        severity.severeHeadache = true;
+      }
+      followUpQuestions.push("Where is the pain located?");
+      followUpQuestions.push("On a scale of 1-10, how severe is the headache?");
+    }
+    
+    // Body pain/ache symptoms (contributes 5-15 points)
+    if (lowerMessage.includes('body pain') || lowerMessage.includes('ache') || lowerMessage.includes('muscle pain')) {
+      riskScore += 5;
+      severity.bodyPain = true;
+      if (lowerMessage.includes('severe') || lowerMessage.includes('unbearable')) {
+        riskScore += 10;
+        severity.severeBodyPain = true;
+      }
+      followUpQuestions.push("Which parts of your body are affected?");
+    }
+    
+    // Throat symptoms (contributes 3-8 points)
+    if (lowerMessage.includes('sore throat') || lowerMessage.includes('throat pain')) {
+      riskScore += 3;
+      severity.throatPain = true;
+      conditions.push({ condition: "Pharyngitis", probability_estimate: "Moderate" });
+      if (lowerMessage.includes('difficulty swallowing') || lowerMessage.includes('severe')) {
+        riskScore += 5;
+      }
+    }
+    
+    // Nausea/Vomiting (contributes 8-15 points)
+    if (lowerMessage.includes('nausea') || lowerMessage.includes('vomiting') || lowerMessage.includes('feel sick')) {
+      riskScore += 8;
+      severity.nausea = true;
+      if (lowerMessage.includes('severe') || lowerMessage.includes('continuous')) {
+        riskScore += 7;
+        severity.severeNausea = true;
+      }
+      followUpQuestions.push("How many times have you vomited?");
+    }
+    
+    // Diarrhea (contributes 5-12 points)
+    if (lowerMessage.includes('diarrhea') || lowerMessage.includes('loose motion')) {
+      riskScore += 5;
+      severity.diarrhea = true;
+      if (lowerMessage.includes('bloody') || lowerMessage.includes('severe')) {
+        riskScore += 7;
+        severity.severeDiarrhea = true;
+      }
+      followUpQuestions.push("How many times per day?");
+    }
+    
+    // CRITICAL SYMPTOMS (Immediate high scoring)
+    
+    // Chest pain (contributes 40-50 points)
+    if (lowerMessage.includes('chest pain') || lowerMessage.includes('chest discomfort')) {
+      riskScore += 50;
+      emergencyDetected = true;
+      severity.chestPain = true;
+      conditions = [
+        { condition: "Acute Coronary Syndrome", probability_estimate: "High" },
+        { condition: "Angina", probability_estimate: "Moderate" }
+      ];
+      followUpQuestions = [
+        "Is the pain radiating to your arm or jaw?",
+        "How long has the pain been lasting?"
+      ];
+    }
+    
+    // Difficulty breathing (contributes 35-45 points)
+    if (lowerMessage.includes('difficulty breathing') || lowerMessage.includes('breathless') || lowerMessage.includes('shortness of breath')) {
+      riskScore += 40;
+      emergencyDetected = true;
+      severity.difficultyBreathing = true;
+      conditions.push({ condition: "Respiratory Distress", probability_estimate: "High" });
+      followUpQuestions.push("Did this start suddenly?");
+    }
+    
+    // Severe bleeding (contributes 45-50 points)
+    if (lowerMessage.includes('bleeding') || lowerMessage.includes('blood loss')) {
+      riskScore += 45;
+      emergencyDetected = true;
+      severity.bleeding = true;
+      followUpQuestions.push("How much blood loss?");
+    }
+    
+    // Unconsciousness/Fainting (contributes 45-50 points)
+    if (lowerMessage.includes('unconscious') || lowerMessage.includes('fainted') || lowerMessage.includes('passed out')) {
+      riskScore += 50;
+      emergencyDetected = true;
+      severity.unconscious = true;
+      conditions.push({ condition: "Loss of Consciousness", probability_estimate: "High" });
+    }
+    
+    // Seizures (contributes 45-50 points)
+    if (lowerMessage.includes('seizure') || lowerMessage.includes('convulsion')) {
+      riskScore += 50;
+      emergencyDetected = true;
+      severity.seizure = true;
+      conditions.push({ condition: "Seizure Disorder", probability_estimate: "High" });
+    }
+    
+    // DURATION MODIFIER
+    if (lowerMessage.match(/\d+\s*(day|days|week|weeks|month|months)/)) {
+      const match = lowerMessage.match(/(\d+)\s*(day|days|week|weeks|month|months)/);
+      if (match) {
+        const duration = parseInt(match[1]);
+        const unit = match[2];
+        
+        // Persistent symptoms increase risk
+        if ((unit.includes('day') && duration > 3) || unit.includes('week') || unit.includes('month')) {
+          riskScore += 10;
+        }
+        if (unit.includes('week') || unit.includes('month')) {
+          riskScore += 5;
+        }
+      }
+    }
+    
+    // Cap the score at 100
+    riskScore = Math.min(100, Math.max(0, riskScore));
+    
+    // DEFAULT CONDITIONS if none detected
+    if (conditions.length === 0) {
+      conditions.push({ condition: "General Illness", probability_estimate: "Low" });
+      if (followUpQuestions.length < 2) {
+        followUpQuestions.push("Can you describe your symptoms in detail?");
+        followUpQuestions.push("When did these symptoms start?");
+      }
+    }
+    
+    // GENERATE RECOMMENDATIONS BASED ON RISK LEVEL
+    let riskLevel;
+    
+    if (riskScore >= 76) {
+      // CRITICAL (76-100): Need urgent medical care
+      riskLevel = "CRITICAL";
+      recommendations = [
+        "🚨 CRITICAL: You need immediate medical attention!",
+        "Call 108 (Emergency) or go to nearest hospital immediately",
+        "Do not delay - seek emergency care right now",
+        "If chest pain or breathing difficulty - call emergency immediately",
+        "Have someone accompany you to hospital"
+      ];
+    } 
+    else if (riskScore >= 51) {
+      // HIGH (51-75): Need to consult doctor
+      riskLevel = "HIGH";
+      recommendations = [
+        "⚠️ You need to consult a doctor soon",
+        "Schedule a doctor appointment as soon as possible (within 24 hours)",
+        "Do not ignore these symptoms",
+        "Get medical evaluation to rule out serious conditions",
+        "Avoid self-medication - consult qualified doctor",
+        "Monitor your symptoms closely",
+        "If symptoms worsen, seek immediate medical care"
+      ];
+    } 
+    else if (riskScore >= 26) {
+      // MODERATE (26-50): Take rest
+      riskLevel = "MODERATE";
+      recommendations = [
+        "⚠️ Take adequate rest and monitor your condition",
+        "Get 7-8 hours of sleep daily",
+        "Stay hydrated - drink plenty of water",
+        "Avoid strenuous activities",
+        "Eat nutritious food",
+        "If symptoms persist beyond 3 days, consult a doctor",
+        "Consider OTC medication as needed (Paracetamol for fever/pain)"
+      ];
+    } 
+    else {
+      // LOW (0-25): No need to worry, take medication
+      riskLevel = "LOW";
+      recommendations = [
+        "✅ No need to worry - appears to be mild",
+        "Take OTC medication as needed",
+        "Get adequate rest",
+        "Stay hydrated",
+        "Maintain hygiene",
+        "Symptoms should improve in 2-3 days",
+        "Consult doctor if symptoms persist"
+      ];
+    }
+    
+    // Ensure we have recommendations
+    if (recommendations.length === 0) {
+      recommendations.push("Monitor your condition closely");
+    }
+    
+    // Ensure we have follow-up questions
+    if (followUpQuestions.length === 0) {
+      followUpQuestions = [
+        "How long have you been experiencing these symptoms?",
+        "Have you taken any medication?",
+        "Do you have any chronic diseases?"
+      ];
+    }
+    
+    // Limit to 3 questions and 5 recommendations
+    followUpQuestions = followUpQuestions.slice(0, 3);
+    recommendations = recommendations.slice(0, 5);
+
+    return {
+      symptom_summary: message,
+      predicted_conditions: conditions.slice(0, 3),
+      risk_score: riskScore,
+      risk_level: riskLevel,
+      emergency: emergencyDetected || riskScore >= 85,
+      recommendations: recommendations,
+      follow_up_questions: followUpQuestions,
+      disclaimer: "This tool provides preliminary health information and is not a substitute for professional medical advice.",
+      language
+    };
   }
 
   detectLanguage(message) {
