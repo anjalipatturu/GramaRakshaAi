@@ -16,13 +16,24 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.File({ filename: path.join(logsDir, 'error.log'), level: 'error' }),
-    new winston.transports.File({ filename: path.join(logsDir, 'combined.log') })
+    new winston.transports.File({ filename: path.join(logsDir, 'combined.log') }),
+    new winston.transports.Console({
+      level: 'error',
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
   ]
 });
 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
-    format: winston.format.simple()
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    )
   }));
 }
 

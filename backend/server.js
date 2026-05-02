@@ -116,6 +116,8 @@ mongoose.connect(mongoUri, {
 .catch((err) => {
   logger.error('MongoDB connection error:', err.message);
   logger.error('Please check your MONGODB_URI environment variable');
+  console.error('MongoDB connection error:', err.message);
+  console.error('Please check your MONGODB_URI environment variable');
 
   // In development, start server anyway for testing
   if (process.env.NODE_ENV !== 'production') {
@@ -126,6 +128,7 @@ mongoose.connect(mongoUri, {
     });
   } else {
     logger.error('Cannot start server without database connection in production');
+    console.error('Cannot start server without database connection in production');
     process.exit(1);
   }
 });
