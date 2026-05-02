@@ -46,11 +46,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend build
-const frontendBuildPath = path.join(__dirname, '../frontend/build');
-app.use(express.static(frontendBuildPath));
-
-// Routes
+// API Routes only - frontend served separately
 app.use('/api/auth', authRoutes);
 app.use('/api/screenings', screeningRoutes);
 app.use('/api/chatbot', chatbotRoutes);
@@ -62,7 +58,7 @@ app.use('/api/villages', villageRoutes);
 app.get('/health', (req, res) => {
   const health = {
     status: 'OK',
-    message: 'GramaRaksha AI Backend Running',
+    message: 'GramaRaksha AI Backend API Running',
     environment: process.env.NODE_ENV || 'development',
     mongodb: {
       configured: !!process.env.MONGODB_URI,
@@ -89,9 +85,26 @@ app.get('/health', (req, res) => {
   res.status(200).json(health);
 });
 
-// Fallback to React app for unmatched routes (React Router)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendBuildPath, 'index.html'));
+// API info endpoint
+app.get('/api', (req, res) => {
+  res.json({
+    message: 'GramaRaksha AI Backend API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      screenings: '/api/screenings',
+      chatbot: '/api/chatbot',
+      admin: '/api/admin',
+      upload: '/api/upload',
+      villages: '/api/villages',
+      health: '/health'
+    }
+  });
+});
+
+// Catch-all for API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
 });
 
 // Error handling middleware
