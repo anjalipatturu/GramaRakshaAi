@@ -154,3 +154,7 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
