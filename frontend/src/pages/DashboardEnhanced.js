@@ -60,7 +60,7 @@ const DashboardEnhanced = () => {
     if (api) {
       fetchDashboardData();
     }
-  }, []);
+  }, [api]);
 
   const translations = {
     en: {

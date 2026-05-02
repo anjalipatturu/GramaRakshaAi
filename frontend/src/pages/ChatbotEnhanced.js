@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaRobot, FaPaperPlane, FaMicrophone, FaStopCircle, FaSmile, FaExclamationTriangle, FaHospital, FaQuestionCircle, FaHeartbeat, FaVolumeUp, FaVolumeMute, FaGlobe, FaImage } from 'react-icons/fa';
+import { FaRobot, FaPaperPlane, FaMicrophone, FaStopCircle, FaSmile, FaExclamationTriangle, FaHospital, FaHeartbeat, FaVolumeUp, FaVolumeMute, FaGlobe, FaImage } from 'react-icons/fa';
 import { useApp } from '../context/AppContext';
 import toast from 'react-hot-toast';
 
@@ -55,7 +55,7 @@ const ChatbotEnhanced = () => {
         timestamp: new Date()
       }]);
     }
-  }, []);
+  }, [messages.length, t.welcome]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
