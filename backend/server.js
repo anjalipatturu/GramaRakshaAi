@@ -60,7 +60,33 @@ app.use('/api/villages', villageRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'GramaRaksha AI Backend Running' });
+  const health = {
+    status: 'OK',
+    message: 'GramaRaksha AI Backend Running',
+    environment: process.env.NODE_ENV || 'development',
+    mongodb: {
+      configured: !!process.env.MONGODB_URI,
+      connected: mongoose.connection.readyState === 1
+    },
+    ai: {
+      offlineMode: process.env.OFFLINE_MODE === 'true',
+      apiKeyConfigured: !!process.env.GEMINI_API_KEY
+    },
+    jwt: {
+      secretConfigured: !!process.env.JWT_SECRET
+    }
+  };
+
+  // Return error status if critical services are not configured
+  if (!health.mongodb.configured && process.env.NODE_ENV === 'production') {
+    return res.status(500).json({
+      ...health,
+      status: 'ERROR',
+      message: 'MongoDB not configured for production'
+    });
+  }
+
+  res.status(200).json(health);
 });
 
 // Fallback to React app for unmatched routes (React Router)
@@ -72,9 +98,12 @@ app.get('*', (req, res) => {
 app.use(errorHandler);
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gramaraksha', {
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/gramaraksha';
+
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
 })
 .then(() => {
   logger.info('Connected to MongoDB');
@@ -85,8 +114,20 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gramaraks
   });
 })
 .catch((err) => {
-  logger.error('MongoDB connection error:', err);
-  process.exit(1);
+  logger.error('MongoDB connection error:', err.message);
+  logger.error('Please check your MONGODB_URI environment variable');
+
+  // In development, start server anyway for testing
+  if (process.env.NODE_ENV !== 'production') {
+    logger.warn('Starting server in offline mode for development');
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      logger.info(`Server running on port ${PORT} (MongoDB offline)`);
+    });
+  } else {
+    logger.error('Cannot start server without database connection in production');
+    process.exit(1);
+  }
 });
 
 // Graceful shutdown
